@@ -1,0 +1,1 @@
+g++ -g main.cpp Snake.cpp Utils.cpp -o Snake.exe
