@@ -22,6 +22,8 @@ void Snake::initSnake() {
 
     Utils::showConsoleCursor(false);
 
+    /* Direction can only be horizontal OR vertical, therefore one of them is set V_NUL (0).
+    Here i flip a coin to choose starting direction */
     if (!Utils::genRandomInt(0, 1)) {
 
         m_vx = V_NUL;
@@ -51,15 +53,17 @@ void Snake::initSnake() {
 
 void Snake::run() {
 
+    /* I want the snake to move without waiting for user to tell it to move.
+    This is assured by making readUserInput non-blocking (see implementation).
+    The result is that the snake moves on its own and changes direction when the user
+    press specific keys */
+
     while (isRunning()) {
 
         readUserInput();
         genFruit();
         updateBodyCoord();
         drawField();
-
-        // if (m_deltaT)
-        //     Sleep(m_deltaT);
     }
 }
 
@@ -69,6 +73,7 @@ bool Snake::isRunning() {
 
 void Snake::readUserInput() {
 
+    /* Call _getch only if a key has been stroke: this assure readUserInput to be non-blocking */
     if (_kbhit()) {
 
         switch(_getch()) {
@@ -229,24 +234,31 @@ bool Snake::checkBody(int x, int y) {
 }
 
 void Snake::updateBodyCoord() {
-
+    
+    /* Evolve head coordinates according to uniform rectilineas motion's law */
     m_x = m_x + m_vx * m_xT;
     m_y = m_y + m_vy * m_yT;
 
+    /* Update again if snake hits edges to make it go out from the other side */
     checkEdges();
 
     std::pair<int, int> actualCoord(m_x, m_y);
 
-    if (find(m_body.begin(), m_body.end(), actualCoord) != m_body.end())
-        m_run = false;
+    /* Self-explanatory */
+    checkEatItSelf(actualCoord);
 
-    m_body.push_back(actualCoord);
-
-    /* I want to keep m_countFruit + 1 coordinates (head)
+    /* I want to keep m_countFruit + 1 (head) coordinates
     Add the new head coordinate and remove tail coordinate
     */
+    m_body.push_back(actualCoord);
     while (m_body.size() > (m_countFruit + 1))
         m_body.erase(m_body.begin());
+}
+
+void Snake::checkEatItSelf(const std::pair<int, int> &actualCoord) {
+
+    if (find(m_body.begin(), m_body.end(), actualCoord) != m_body.end())
+        m_run = false;
 }
 
 void Snake::genBody() {
@@ -255,19 +267,32 @@ void Snake::genBody() {
     m_x = m_field.at(randomIndex).first;
     m_y = m_field.at(randomIndex).second;
 
+    // Start with only head
     m_body.push_back(std::pair<int, int>{m_x, m_y});
+
+    // To add first part?
+    // m_body.push_back(std::pair<int, int>{m_x + m_vx, m_y + m_vy});
 }
 
 void Snake::genFruit() {
 
+    /* If there is not a fruit in the field m_fruit is false and I have to spawn a new one,
+    being in the field but not in the same position of snake's body.
+    Therefore I choose a random pair of coordinates among available ones: this subset is obtained
+    by subtracting the vector of body coordinates from the vector of field coordinats.
+    Then I set m_fruit to true not to generate a new fruit until the current one is not eaten
+    and to make drawField draw it. */
+
     if (!m_fruit) {
     
         // Need to do m_field - m_body and pick a random pair from the result
-        std::sort(m_field.begin(), m_field.end());
 
-        // i do not want the m_body to be sorted
+        /* set_difference requires the vector to be sorted, but I do not want to sort m_body,
+        otherwise it is a mess when it comes to updateBodyCoord: so I work on a copy */
         std::vector<std::pair<int, int>> m_bodyCopy = m_body;
         std::sort(m_bodyCopy.begin(), m_bodyCopy.end());
+
+        std::sort(m_field.begin(), m_field.end());
 
         std::vector<std::pair<int, int>> availableFruitPos;
         std::set_difference(

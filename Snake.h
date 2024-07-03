@@ -36,6 +36,7 @@ private:
     bool checkHead(int x, int y);
     bool checkBody(int x, int y);
     void updateBodyCoord();
+    void checkEatItSelf(const std::pair<int, int> &actualCoord);
 
     void genFruit();
     void genBody();
