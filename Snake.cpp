@@ -66,9 +66,7 @@ void Snake::run() {
         drawField();
 
         /* I could call checkLose in checkEatItself but I prefer here so i can show all the field
-        and the snake with red head
-        Call here checkPause because if user wanna quit, m_run is set to false and exit at next iteration
-        */
+        and the snake with red head */
         if (checkPause() || checkLose())
             break;
     }
