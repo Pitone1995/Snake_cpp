@@ -41,6 +41,10 @@ private:
     void genFruit();
     void genBody();
 
+    bool checkLose();
+    bool checkPause();
+
+    bool m_pause = false;
     bool m_run = true;
 
     int m_deltaT = 50;

@@ -64,6 +64,13 @@ void Snake::run() {
         genFruit();
         updateBodyCoord();
         drawField();
+
+        /* I could call checkLose in checkEatItself but I prefer here so i can show all the field
+        and the snake with red head
+        Call here checkPause because if user wanna quit, m_run is set to false and exit at next iteration
+        */
+        if (checkPause() || checkLose())
+            break;
     }
 }
 
@@ -78,29 +85,37 @@ void Snake::readUserInput() {
 
         switch(_getch()) {
 
-        case KEY_W:
+        case KEY_W_LOW:
+        case KEY_W_UP:
 
             setYDirection(V_NEG);
             setXDirection(V_NUL);
             break;
 
-        case KEY_S:
+        case KEY_S_LOW:
+        case KEY_S_UP:
 
             setYDirection(V_POS);
             setXDirection(V_NUL);
             break;
 
-
-        case KEY_A:
+        case KEY_A_LOW:
+        case KEY_A_UP:
 
             setXDirection(V_NEG);
             setYDirection(V_NUL);
             break;
 
-        case KEY_D:
+        case KEY_D_LOW:
+        case KEY_D_UP:
             
             setXDirection(V_POS);
             setYDirection(V_NUL);
+            break;
+
+        case KEY_ESC:
+
+            m_pause = true;
             break;
         }
     }
@@ -118,15 +133,15 @@ void Snake::setYDirection(V vel) {
 
 void Snake::drawField() {
 
-    system("cls");
+    Utils::clear();
 
     for (int y = 0; y < H_FIELD; y++) {
 
-        for (int x = 0; x < W_FIELD; x++) {
+        if (y == 0 || y == H_FIELD - 1)
+            Utils::drawElement(std::string(W_FIELD, H_EDGE));
+        else {
 
-            if (y == 0 || y == H_FIELD - 1)
-                Utils::drawElement(H_EDGE);
-            else {
+            for (int x = 0; x < W_FIELD; x++) {
 
                 if (x == 0 || x == W_FIELD - 1)
                     Utils::drawElement(V_EDGE);
@@ -172,35 +187,52 @@ void Snake::drawField() {
                     else
                         Utils::drawElement(' ');
                 }
+                
+                if (x == W_FIELD - 1)
+                    std::cout << "" << std::endl;
             }
-            if (x == W_FIELD - 1)
-                std::cout << "" << std::endl;
         }
     }
 
     std::cout << "" << std::endl;
+}
 
-    // Lose condition       
+bool Snake::checkLose() {
+
+    bool ret = false;
+
     if (!m_run) {
 
-        Utils::showConsoleCursor(true);
-        std::cout << "Ouch!" << "\n";
-
-        std::string choice = "";
-        while (choice != "y" && choice != "n") {
-
-            std::cout << "Do you wanna play again (y/n)? ";
-            std::cin >> choice;
-
-            if (choice == "y") {
-             
-                m_run = true;
-                initSnake();
-            }
-            else if (choice == "n")
-                m_run = false;
+        if (Utils::pauseRoutine("Ouch!", "Do you wanna play again?", "y", "n")) {
+            
+            m_run = true;
+            Utils::clearScreen();
+            initSnake();
         }
+        else
+            ret = true;
     }
+    
+    return ret;
+}
+
+bool Snake::checkPause() {
+
+    bool ret = false;
+
+    if (m_pause) {
+
+         if (Utils::pauseRoutine("Game paused", "Do you wanna resume or quit?", "r", "q")) {
+            
+            m_pause = false;
+            Utils::clearScreen();
+            Utils::showConsoleCursor(false);
+        }
+        else
+            ret = true;
+    }
+
+    return ret;
 }
 
 void Snake::checkEdges() {
