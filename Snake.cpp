@@ -61,13 +61,18 @@ void Snake::run() {
     while (isRunning()) {
 
         readUserInput();
+
+        /* Call here to pause immediatly */
+        if (checkPause())
+            break;
+
         genFruit();
         updateBodyCoord();
         drawField();
 
         /* I could call checkLose in checkEatItself but I prefer here so i can show all the field
         and the snake with red head */
-        if (checkPause() || checkLose())
+        if (checkLose())
             break;
     }
 }
