@@ -22,8 +22,8 @@ void Snake::initSnake() {
 
     Utils::showConsoleCursor(false);
 
-    /* Direction can only be horizontal OR vertical, therefore one of them is set V_NUL (0).
-    Here i flip a coin to choose starting direction */
+    /* Direction can only be horizontal OR vertical, therefore the speed in the other direction
+    must be set to V_NUL (0). Here i flip a coin to choose starting direction */
     if (!Utils::genRandomInt(0, 1)) {
 
         m_vx = V_NUL;
@@ -47,10 +47,12 @@ void Snake::initSnake() {
             m_field.push_back({x, y});
     }
 
+    // Generate coordinates of head and fruit
     genBody();
     genFruit();
 
-    begin = std::chrono::steady_clock::now();
+    // Get starting time point and reset time variables
+    m_begin = std::chrono::steady_clock::now();
     m_min = {};
     m_sec = {};
 }
@@ -60,9 +62,9 @@ void Snake::run() {
     /* I want the snake to move without waiting for user to tell it to move.
     This is assured by making readUserInput non-blocking (see implementation).
     The result is that the snake moves on its own and changes direction when the user
-    press specific keys */
+    press AWSD upper case or lower case */
 
-    begin = std::chrono::steady_clock::now();
+    m_begin = std::chrono::steady_clock::now();
 
     while (isRunning()) {
 
@@ -72,18 +74,22 @@ void Snake::run() {
         if (checkPause())
             break;
 
-        genFruit();
         updateBodyCoord();
+        genFruit();
         drawField();
 
         /* I could call checkLose in checkEatItself but I prefer here so i can show all the field
         and the snake with red head */
         if (checkLose())
             break;
+
+        /* If your CPU makes the snake too fast, use a Sleep here */
+        // Sleep(50);
     }
 }
 
 bool Snake::isRunning() {
+
     return m_run;
 }
 
@@ -140,18 +146,23 @@ void Snake::setYDirection(V vel) {
     m_vy = vel;
 }
 
-std::string Snake::getTime() {
+std::string Snake::getElapsedTime() {
 
     std::chrono::steady_clock::time_point t_now = std::chrono::steady_clock::now();
 
-    int m_sec = std::chrono::duration_cast<std::chrono::seconds>(t_now - begin).count();
+    // Get seconds elapsed from the beginning
+    int m_sec = std::chrono::duration_cast<std::chrono::seconds>(t_now - m_begin).count();
+
+    /* I choose to reset at every minute, so i can reset seconds variable and increment minute variable;
+    maybe there is a better solution */
     if (m_sec == 60) {
      
-        begin = std::chrono::steady_clock::now();
+        m_begin = t_now;
         m_min++;
         m_sec = 0;
     }
 
+    // Graphical representation mm::ss
     std::string m_minS = (m_min < 10 ? "0" + std::to_string(m_min) : std::to_string(m_min));
     std::string m_secS = (m_sec < 10 ? "0" + std::to_string(m_sec) : std::to_string(m_sec));
 
@@ -162,9 +173,7 @@ void Snake::drawField() {
 
     Utils::clear();
 
-    Utils::drawElement(std::string(W_FIELD, H_EDGE));
-    std::cout << V_EDGE << "\tScore: " << m_countFruit << std::endl;
-    std::cout << V_EDGE << "\tTime:  " << getTime() << std::endl;
+    drawHeader();
 
     for (int y = 0; y < H_FIELD; y++) {
 
@@ -197,11 +206,7 @@ void Snake::drawField() {
                             // Generate new fruit coordinates and spawn at next iteration
                             m_fruit = false;
                             m_countFruit++;
-
-                            // Increase speed
-                            // if (m_deltaT)
-                            //     m_deltaT - m_countFruit * 5;
-    
+   
                             // Draw head
                             Utils::drawElement(BODY, BACKGROUND_GREEN);
                         }
@@ -226,6 +231,13 @@ void Snake::drawField() {
     }
 
     std::cout << "" << std::endl;
+}
+
+void Snake::drawHeader() {
+
+    Utils::drawElement(std::string(W_FIELD, H_EDGE));
+    std::cout << V_EDGE << "\tScore: " << m_countFruit << std::endl;
+    std::cout << V_EDGE << "\tTime:  " << getElapsedTime() << std::endl;
 }
 
 bool Snake::checkLose() {
@@ -253,11 +265,17 @@ bool Snake::checkPause() {
 
     if (m_pause) {
 
-         if (Utils::pauseRoutine("Game paused", "Do you wanna resume or quit?", "r", "q")) {
-            
+        std::chrono::steady_clock::time_point t_pause = std::chrono::steady_clock::now();
+
+        if (Utils::pauseRoutine("Game paused", "Do you wanna resume or quit?", "r", "q")) {
+        
             m_pause = false;
             Utils::clearScreen();
             Utils::showConsoleCursor(false);
+            
+            std::chrono::steady_clock::time_point t_now = std::chrono::steady_clock::now();
+            const int64_t sec = std::chrono::duration_cast<std::chrono::seconds>(t_now - t_pause).count();
+            m_begin += std::chrono::seconds(sec);
         }
         else
             ret = true;
@@ -280,15 +298,18 @@ void Snake::checkEdges() {
 }
 
 bool Snake::checkHead(int x, int y) {
+
     return (x == m_x && y == m_y);
 }
 
 bool Snake::checkFruit(int x, int y) {
+
     return (x == m_xFruit && y == m_yFruit);
 }
 
 bool Snake::checkBody(int x, int y) {
 
+    // Check if {x, y} belong to snake's body
     std::pair<int, int> actualCoord(x, y);
     if (std::find(m_body.begin(), m_body.end(), actualCoord) != m_body.end())
         return true;
@@ -311,8 +332,7 @@ void Snake::updateBodyCoord() {
     checkEatItSelf(actualCoord);
 
     /* I want to keep m_countFruit + 1 (head) coordinates
-    Add the new head coordinate and remove tail coordinate
-    */
+    Add the new head coordinate and remove tail coordinate */
     m_body.push_back(actualCoord);
     while (m_body.size() > (m_countFruit + 1))
         m_body.erase(m_body.begin());
@@ -320,6 +340,7 @@ void Snake::updateBodyCoord() {
 
 void Snake::checkEatItSelf(const std::pair<int, int> &actualCoord) {
 
+    // Check if head updated coordinates overlap snake's body
     if (find(m_body.begin(), m_body.end(), actualCoord) != m_body.end())
         m_run = false;
 }

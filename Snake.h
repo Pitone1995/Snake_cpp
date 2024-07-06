@@ -34,6 +34,7 @@ private:
 
     bool isRunning();
     void drawField();
+    void drawHeader();
     void checkEdges();
     bool checkFruit(int x, int y);
     bool checkHead(int x, int y);
@@ -47,12 +48,8 @@ private:
     bool checkLose();
     bool checkPause();
 
-    std::string getTime();
-
     bool m_pause = false;
     bool m_run = true;
-
-    int m_deltaT = 50;
 
     // Law of motion's components
     int m_x{};
@@ -62,6 +59,7 @@ private:
     V m_vx{};
     V m_vy{};
 
+    // Fruit management
     bool m_fruit{};
     int m_xFruit{};
     int m_yFruit{};
@@ -72,9 +70,11 @@ private:
 
     std::vector<std::pair<int, int>> m_field;
 
+    // Time management
     int m_min{};
     int m_sec{};
-    std::chrono::steady_clock::time_point begin;
+    std::chrono::steady_clock::time_point m_begin;
+    std::string getElapsedTime();
 };
 
 #endif
