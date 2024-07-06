@@ -49,6 +49,10 @@ void Snake::initSnake() {
 
     genBody();
     genFruit();
+
+    begin = std::chrono::steady_clock::now();
+    m_min = {};
+    m_sec = {};
 }
 
 void Snake::run() {
@@ -57,6 +61,8 @@ void Snake::run() {
     This is assured by making readUserInput non-blocking (see implementation).
     The result is that the snake moves on its own and changes direction when the user
     press specific keys */
+
+    begin = std::chrono::steady_clock::now();
 
     while (isRunning()) {
 
@@ -134,9 +140,31 @@ void Snake::setYDirection(V vel) {
     m_vy = vel;
 }
 
+std::string Snake::getTime() {
+
+    std::chrono::steady_clock::time_point t_now = std::chrono::steady_clock::now();
+
+    int m_sec = std::chrono::duration_cast<std::chrono::seconds>(t_now - begin).count();
+    if (m_sec == 60) {
+     
+        begin = std::chrono::steady_clock::now();
+        m_min++;
+        m_sec = 0;
+    }
+
+    std::string m_minS = (m_min < 10 ? "0" + std::to_string(m_min) : std::to_string(m_min));
+    std::string m_secS = (m_sec < 10 ? "0" + std::to_string(m_sec) : std::to_string(m_sec));
+
+    return m_minS + ':' + m_secS;    
+}
+
 void Snake::drawField() {
 
     Utils::clear();
+
+    Utils::drawElement(std::string(W_FIELD, H_EDGE));
+    std::cout << V_EDGE << "\tScore: " << m_countFruit << std::endl;
+    std::cout << V_EDGE << "\tTime:  " << getTime() << std::endl;
 
     for (int y = 0; y < H_FIELD; y++) {
 

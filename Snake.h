@@ -5,6 +5,9 @@
 #include <utility>
 #include <vector>
 
+#include <chrono>
+#include <string>
+
 typedef enum {
 
     V_NEG = -1,
@@ -44,6 +47,8 @@ private:
     bool checkLose();
     bool checkPause();
 
+    std::string getTime();
+
     bool m_pause = false;
     bool m_run = true;
 
@@ -66,6 +71,10 @@ private:
     std::vector<std::pair<int, int>> m_body;
 
     std::vector<std::pair<int, int>> m_field;
+
+    int m_min{};
+    int m_sec{};
+    std::chrono::steady_clock::time_point begin;
 };
 
 #endif
