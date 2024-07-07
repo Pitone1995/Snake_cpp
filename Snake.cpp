@@ -316,7 +316,7 @@ void Snake::updateBodyCoord() {
     /* I want to keep m_countFruit + 1 (head) coordinates
     Add the new head coordinate and remove tail coordinate */
     m_body.push_back(actualCoord);
-    while (m_body.size() > (m_countFruit + 1))
+    if (m_body.size() > (m_countFruit + 1))
         m_body.erase(m_body.begin());
 }
 
@@ -335,9 +335,6 @@ void Snake::genBody() {
 
     // Start with only head
     m_body.push_back(std::pair<int, int>{m_x, m_y});
-
-    // To add first part?
-    // m_body.push_back(std::pair<int, int>{m_x + m_vx, m_y + m_vy});
 }
 
 void Snake::genFruit() {
