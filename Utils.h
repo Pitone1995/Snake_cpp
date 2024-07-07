@@ -11,6 +11,7 @@
 #define DEFAULT_TXT 7 // grey text, black background (default for cmd)
 #define GREEN_TXT 10 // green text (brighter than FOREGROUND_GREEN), black background
 #define RED_TXT 12 // red text (brighter than FOREGROUND_RED), black background
+#define YELLOW_TXT 14
 
 #define UP_ARROW 72
 #define DWN_ARROW 80

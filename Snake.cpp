@@ -5,6 +5,7 @@
 
 #define H_FIELD 25
 #define W_FIELD 50
+#define W_CMD   25
 
 #define FRUIT '@'
 #define BODY ' '
@@ -71,7 +72,7 @@ void Snake::run() {
 
         readUserInput();
 
-        /* Call here to pause immediatly */
+        /* Call here to pause immediatly after ESC is read */
         if (checkPause())
             break;
 
@@ -152,6 +153,9 @@ void Snake::drawField() {
     Utils::clear();
 
     drawHeader();
+    drawSide();
+
+    Utils::setCursor(0, 2);
 
     for (int y = 0; y < H_FIELD; y++) {
 
@@ -213,16 +217,72 @@ void Snake::drawField() {
 
 void Snake::drawHeader() {
    
-    Utils::drawElement(std::string(W_FIELD, H_EDGE));
-    std::cout << V_EDGE << "\tScore: " << m_countFruit;
+    /*
+    ==========================================================
+    |                                                        |
+    |                        SNAKE GAME                      |
+    |                                                        |
+    ==========================================================
+    |                               |                        |
+    |                               |  Score:    1           |
+    |                               |  Time:     01:02       |
+    |                               |  Status:   RUNNING     |
+    |                               |                        |
+    |                               |  Commands:             |
+    |                               |  - A:      move left   |
+    |                               |  - W:      move up     |
+    |                               |  - S:      move down   |
+    |                               |  - D:      move right  |
+    |                               |  - ESC:    pause game  |
+    |                               |                        |
+    |                               |                        |
+    |                               |                        |
+    ==========================================================
+    |                               |                        |
+    0                               W_FIELD - 1              W_FIELD + W_CMD - 1
+    */
 
-    Utils::setCursor(W_FIELD - 1, 1);
+    Utils::drawElement(std::string(W_FIELD + W_CMD, H_EDGE));
+    std::cout << V_EDGE << std::string(32, ' ') << "SNAKE GAME" << std::string(31, ' ') << V_EDGE << std::endl;
+    
+    Utils::setCursor(W_FIELD, 2);
+    std::cout << std::string(W_CMD, H_EDGE);      
+}
+
+void Snake::drawSide() {
+
+    Utils::setCursor(W_FIELD, 3);
+    std::cout << "" << std::endl;
+    Utils::setCursor(W_FIELD + W_CMD - 1, 3);
     std::cout << V_EDGE << std::endl;
 
-    std::cout << V_EDGE << "\tTime:  " << m_timer->getElapsedTime();
-
-    Utils::setCursor(W_FIELD - 1, 2);
+    Utils::setCursor(W_FIELD, 4);
+    std::cout << "\tScore:    " << m_countFruit;
+    Utils::setCursor(W_FIELD + W_CMD - 1, 4);
     std::cout << V_EDGE << std::endl;
+
+    Utils::setCursor(W_FIELD, 5);
+    std::cout << "\tTime:     " << m_timer->getElapsedTime();
+    Utils::setCursor(W_FIELD + W_CMD - 1, 5);
+    std::cout << V_EDGE << std::endl;
+
+    Utils::setCursor(W_FIELD, 6);
+    std::cout << "\tStatus:";
+    if (m_run)
+        Utils::drawElement("   RUNNING\t", GREEN_TXT);
+    else if (!m_run)
+        Utils::drawElement("   END\t\t", RED_TXT);
+
+    for (int i = 6; i < H_FIELD + 1; i++) {
+
+        Utils::setCursor(W_FIELD + W_CMD - 1, i);
+        std::cout << V_EDGE << std::endl;
+    }
+    Utils::setCursor(W_FIELD, H_FIELD + 1);
+    std::cout << std::string(W_CMD, H_EDGE) << std::endl;
+
+    // Utils::setCursor(W_FIELD - 1, 2);
+    // std::cout << V_EDGE << std::endl;
 }
 
 bool Snake::checkLose() {
@@ -250,7 +310,15 @@ bool Snake::checkPause() {
     if (m_pause) {
 
         m_timer->pauseTimer();
-
+        
+        Utils::setCursor(W_FIELD, 6);
+        std::cout << "\tStatus:";
+        Utils::drawElement("   PAUSED\t", YELLOW_TXT);
+        Utils::setCursor(W_FIELD + W_CMD - 1, 6);
+        std::cout << V_EDGE << std::endl;
+        
+        Utils::setCursor(0, H_FIELD + 3);
+        
         if (Utils::pauseRoutine("Game paused", "Do you wanna resume or quit?", "r", "q")) {
         
             m_pause = false;

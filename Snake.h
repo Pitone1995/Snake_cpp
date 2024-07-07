@@ -35,6 +35,7 @@ private:
     bool isRunning();
     void drawField();
     void drawHeader();
+    void drawSide();
     void checkEdges();
     bool checkFruit(int x, int y);
     bool checkHead(int x, int y);
