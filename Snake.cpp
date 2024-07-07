@@ -15,11 +15,14 @@
 
 Snake::Snake() {
 	
+    m_timer = std::make_unique<Timer>();
+
     initSnake();
 }
 
 void Snake::initSnake() {
 
+    Utils::clearScreen();
     Utils::showConsoleCursor(false);
 
     /* Direction can only be horizontal OR vertical, therefore the speed in the other direction
@@ -52,9 +55,7 @@ void Snake::initSnake() {
     genFruit();
 
     // Get starting time point and reset time variables
-    m_begin = std::chrono::steady_clock::now();
-    m_min = {};
-    m_sec = {};
+    m_timer->resetTimer();
 }
 
 void Snake::run() {
@@ -64,7 +65,7 @@ void Snake::run() {
     The result is that the snake moves on its own and changes direction when the user
     press AWSD upper case or lower case */
 
-    m_begin = std::chrono::steady_clock::now();
+    m_timer->resetTimer();
 
     while (isRunning()) {
 
@@ -146,29 +147,6 @@ void Snake::setYDirection(V vel) {
     m_vy = vel;
 }
 
-std::string Snake::getElapsedTime() {
-
-    std::chrono::steady_clock::time_point t_now = std::chrono::steady_clock::now();
-
-    // Get seconds elapsed from the beginning
-    int m_sec = std::chrono::duration_cast<std::chrono::seconds>(t_now - m_begin).count();
-
-    /* I choose to reset at every minute, so i can reset seconds variable and increment minute variable;
-    maybe there is a better solution */
-    if (m_sec == 60) {
-     
-        m_begin = t_now;
-        m_min++;
-        m_sec = 0;
-    }
-
-    // Graphical representation mm::ss
-    std::string m_minS = (m_min < 10 ? "0" + std::to_string(m_min) : std::to_string(m_min));
-    std::string m_secS = (m_sec < 10 ? "0" + std::to_string(m_sec) : std::to_string(m_sec));
-
-    return m_minS + ':' + m_secS;    
-}
-
 void Snake::drawField() {
 
     Utils::clear();
@@ -234,10 +212,17 @@ void Snake::drawField() {
 }
 
 void Snake::drawHeader() {
-
+   
     Utils::drawElement(std::string(W_FIELD, H_EDGE));
-    std::cout << V_EDGE << "\tScore: " << m_countFruit << std::endl;
-    std::cout << V_EDGE << "\tTime:  " << getElapsedTime() << std::endl;
+    std::cout << V_EDGE << "\tScore: " << m_countFruit;
+
+    Utils::setCursor(W_FIELD - 1, 1);
+    std::cout << V_EDGE << std::endl;
+
+    std::cout << V_EDGE << "\tTime:  " << m_timer->getElapsedTime();
+
+    Utils::setCursor(W_FIELD - 1, 2);
+    std::cout << V_EDGE << std::endl;
 }
 
 bool Snake::checkLose() {
@@ -249,7 +234,6 @@ bool Snake::checkLose() {
         if (Utils::pauseRoutine("Ouch!", "Do you wanna play again?", "y", "n")) {
             
             m_run = true;
-            Utils::clearScreen();
             initSnake();
         }
         else
@@ -265,7 +249,7 @@ bool Snake::checkPause() {
 
     if (m_pause) {
 
-        std::chrono::steady_clock::time_point t_pause = std::chrono::steady_clock::now();
+        m_timer->pauseTimer();
 
         if (Utils::pauseRoutine("Game paused", "Do you wanna resume or quit?", "r", "q")) {
         
@@ -273,9 +257,7 @@ bool Snake::checkPause() {
             Utils::clearScreen();
             Utils::showConsoleCursor(false);
             
-            std::chrono::steady_clock::time_point t_now = std::chrono::steady_clock::now();
-            const int64_t sec = std::chrono::duration_cast<std::chrono::seconds>(t_now - t_pause).count();
-            m_begin += std::chrono::seconds(sec);
+            m_timer->restartWDelay();
         }
         else
             ret = true;

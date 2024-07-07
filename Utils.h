@@ -31,6 +31,8 @@ class Utils {
 
 public:
 
+    static void setCursor(int x, int y);
+
     static void setColor(unsigned short int code);
 	static void resetColor();
 	static void showConsoleCursor(bool showFlag);

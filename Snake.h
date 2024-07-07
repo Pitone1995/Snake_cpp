@@ -5,8 +5,8 @@
 #include <utility>
 #include <vector>
 
-#include <chrono>
-#include <string>
+#include "Timer.h"
+#include <memory>
 
 typedef enum {
 
@@ -71,10 +71,7 @@ private:
     std::vector<std::pair<int, int>> m_field;
 
     // Time management
-    int m_min{};
-    int m_sec{};
-    std::chrono::steady_clock::time_point m_begin;
-    std::string getElapsedTime();
+    std::unique_ptr<Timer> m_timer;
 };
 
 #endif

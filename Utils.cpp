@@ -1,5 +1,14 @@
 #include "Utils.h"
 
+void Utils::setCursor(int x, int y) {
+
+    COORD coord;
+    coord.X = x;
+    coord.Y = y;
+
+    SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
+}
+
 void Utils::setColor(unsigned short int code) {
 
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
