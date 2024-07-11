@@ -19,14 +19,10 @@
 #define RIGHT_ARROW 77
 #define KEY_ENTER 13
 #define KEY_ESC 27
-#define KEY_A_LOW 97
-#define KEY_D_LOW 100
-#define KEY_S_LOW 115
-#define KEY_W_LOW 119
-#define KEY_A_UP 65
-#define KEY_D_UP 68
-#define KEY_S_UP 83
-#define KEY_W_UP 87
+#define KEY_A 65
+#define KEY_D 68
+#define KEY_S 83
+#define KEY_W 87
 
 class Utils {
 

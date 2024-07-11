@@ -5,7 +5,7 @@
 
 #define H_FIELD 25
 #define W_FIELD 50
-#define W_CMD   25
+#define W_CMD   18
 
 #define FRUIT '@'
 #define BODY ' '
@@ -86,7 +86,7 @@ void Snake::run() {
             break;
 
         /* If your CPU makes the snake too fast, use a Sleep here */
-        // Sleep(50);
+        Sleep(50);
     }
 }
 
@@ -100,31 +100,27 @@ void Snake::readUserInput() {
     /* Call _getch only if a key has been stroke: this assure readUserInput to be non-blocking */
     if (_kbhit()) {
 
-        switch(_getch()) {
+        switch(toupper(_getch())) {
 
-        case KEY_W_LOW:
-        case KEY_W_UP:
+        case KEY_W:
 
             setYDirection(V_NEG);
             setXDirection(V_NUL);
             break;
 
-        case KEY_S_LOW:
-        case KEY_S_UP:
+        case KEY_S:
 
             setYDirection(V_POS);
             setXDirection(V_NUL);
             break;
 
-        case KEY_A_LOW:
-        case KEY_A_UP:
+        case KEY_A:
 
             setXDirection(V_NEG);
             setYDirection(V_NUL);
             break;
 
-        case KEY_D_LOW:
-        case KEY_D_UP:
+        case KEY_D:
             
             setXDirection(V_POS);
             setYDirection(V_NUL);
@@ -218,33 +214,37 @@ void Snake::drawField() {
 void Snake::drawHeader() {
    
     /*
-    ==========================================================
-    |                                                        |
-    |                        SNAKE GAME                      |
-    |                                                        |
-    ==========================================================
-    |                               |                        |
-    |                               |  Score:    1           |
-    |                               |  Time:     01:02       |
-    |                               |  Status:   RUNNING     |
-    |                               |                        |
-    |                               |  Commands:             |
-    |                               |  - A:      move left   |
-    |                               |  - W:      move up     |
-    |                               |  - S:      move down   |
-    |                               |  - D:      move right  |
-    |                               |  - ESC:    pause game  |
-    |                               |                        |
-    |                               |                        |
-    |                               |                        |
-    ==========================================================
-    |                               |                        |
-    0                               W_FIELD - 1              W_FIELD + W_CMD - 1
+    0 ==========================================================
+    1 |                        SNAKE GAME                      |
+    2 ==========================================================
+    3 |                               |                        |
+    4 |                               | Score:  1              |
+    5 |                               | Time:   01:02          |
+    6 |                               | Status: RUNNING        |
+    7 |                               |                        |
+    8 |                               | Left:   A              |
+    9 |                               | Up:     W              |
+    10|                               | Down:   S              |
+    11|                               | Right:  D              |
+	12|                               | 					   |
+    13|                               | Pause:  ESC            |
+	14|                               | 					   |
+                                    ...
+	  ========================================================== H_FIELD + 1
+      |                               |                        |
+      0                               W_FIELD - 1              W_FIELD + W_CMD - 1
+	  
+				  _ 
+				_|W|_
+			   |A|S|D|
+			   
     */
 
-    Utils::drawElement(std::string(W_FIELD + W_CMD, H_EDGE));
-    std::cout << V_EDGE << std::string(32, ' ') << "SNAKE GAME" << std::string(31, ' ') << V_EDGE << std::endl;
-    
+	Utils::setCursor(0, 0);
+	
+	std::cout << std::string(W_FIELD + W_CMD, H_EDGE) << std::endl;
+	std::cout << "|                            SNAKE GAME                            |" << std::endl;
+	
     Utils::setCursor(W_FIELD, 2);
     std::cout << std::string(W_CMD, H_EDGE);      
 }
@@ -257,32 +257,66 @@ void Snake::drawSide() {
     std::cout << V_EDGE << std::endl;
 
     Utils::setCursor(W_FIELD, 4);
-    std::cout << "\tScore:    " << m_countFruit;
+    std::cout << " Score:  " << m_countFruit;
     Utils::setCursor(W_FIELD + W_CMD - 1, 4);
     std::cout << V_EDGE << std::endl;
 
     Utils::setCursor(W_FIELD, 5);
-    std::cout << "\tTime:     " << m_timer->getElapsedTime();
+    std::cout << " Time:   " << m_timer->getElapsedTime();
     Utils::setCursor(W_FIELD + W_CMD - 1, 5);
     std::cout << V_EDGE << std::endl;
 
     Utils::setCursor(W_FIELD, 6);
-    std::cout << "\tStatus:";
+    std::cout << " Status: ";
     if (m_run)
-        Utils::drawElement("   RUNNING\t", GREEN_TXT);
+        Utils::drawElement("RUNNING\t", GREEN_TXT);
     else if (!m_run)
-        Utils::drawElement("   END\t\t", RED_TXT);
+        Utils::drawElement("END\t\t", RED_TXT);
+	Utils::setCursor(W_FIELD + W_CMD - 1, 6);
+	std::cout << V_EDGE << std::endl;
 
-    for (int i = 6; i < H_FIELD + 1; i++) {
+	Utils::setCursor(W_FIELD, 7);
+    std::cout << "" << std::endl;
+    Utils::setCursor(W_FIELD + W_CMD - 1, 7);
+    std::cout << V_EDGE << std::endl;
+	
+	Utils::setCursor(W_FIELD, 8);
+    std::cout << " Left:   A";
+    Utils::setCursor(W_FIELD + W_CMD - 1, 8);
+    std::cout << V_EDGE << std::endl;
+	
+	Utils::setCursor(W_FIELD, 9);
+    std::cout << " Up:     W";
+    Utils::setCursor(W_FIELD + W_CMD - 1, 9);
+    std::cout << V_EDGE << std::endl;
+	
+	Utils::setCursor(W_FIELD, 10);
+    std::cout << " Down:   S";
+    Utils::setCursor(W_FIELD + W_CMD - 1, 10);
+    std::cout << V_EDGE << std::endl;
+	
+	Utils::setCursor(W_FIELD, 11);
+    std::cout << " Right:  D";
+    Utils::setCursor(W_FIELD + W_CMD - 1, 11);
+    std::cout << V_EDGE << std::endl;
+	
+	Utils::setCursor(W_FIELD, 12);
+    std::cout << "" << std::endl;
+    Utils::setCursor(W_FIELD + W_CMD - 1, 12);
+    std::cout << V_EDGE << std::endl;
+	
+	Utils::setCursor(W_FIELD, 13);
+    std::cout << " Pause:  ESC" << std::endl;
+    Utils::setCursor(W_FIELD + W_CMD - 1, 13);
+    std::cout << V_EDGE << std::endl;
+
+    for (int i = 14; i < H_FIELD + 1; i++) {
 
         Utils::setCursor(W_FIELD + W_CMD - 1, i);
         std::cout << V_EDGE << std::endl;
     }
     Utils::setCursor(W_FIELD, H_FIELD + 1);
     std::cout << std::string(W_CMD, H_EDGE) << std::endl;
-
-    // Utils::setCursor(W_FIELD - 1, 2);
-    // std::cout << V_EDGE << std::endl;
 }
 
 bool Snake::checkLose() {
@@ -312,8 +346,8 @@ bool Snake::checkPause() {
         m_timer->pauseTimer();
         
         Utils::setCursor(W_FIELD, 6);
-        std::cout << "\tStatus:";
-        Utils::drawElement("   PAUSED\t", YELLOW_TXT);
+        std::cout << " Status: ";
+        Utils::drawElement("PAUSED\t", YELLOW_TXT);
         Utils::setCursor(W_FIELD + W_CMD - 1, 6);
         std::cout << V_EDGE << std::endl;
         
@@ -407,12 +441,11 @@ void Snake::genBody() {
 
 void Snake::genFruit() {
 
-    /* If there is not a fruit in the field m_fruit is false and I have to spawn a new one,
-    being in the field but not in the same position of snake's body.
-    Therefore I choose a random pair of coordinates among available ones: this subset is obtained
-    by subtracting the vector of body coordinates from the vector of field coordinats.
-    Then I set m_fruit to true not to generate a new fruit until the current one is not eaten
-    and to make drawField draw it. */
+    /* If there is not a fruit in the field m_fruit is false and I have to spawn a new one
+	in the field but not in the same position of snake's body. I compute the subset of available
+	coordinates by subtracting the vector of body coordinates from the vector of field coordinates,
+	then I pick a random pair of coordinates from it. Eventually I set m_fruit to true not to generate
+	a new fruit until the current one is not eaten and to make drawField draw it. */
 
     if (!m_fruit) {
     
